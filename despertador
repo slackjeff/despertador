@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+#============HEADER==========================================================|
+#AUTOR
+#  Jefferson Rocha <lrcjefferson@gmail.com>
+#
+#PROGRAMA
+#  Despertador
+#
+#DEPS
+#  Necessita do programa beep, speaker no seu cpu e claro, o módulo
+#  pcspk carregado! não se preocupe se seu kernel ter suporte o módulo é
+#  carregador automaticamente pelo programa.
+#
+#DICA
+#  Coloque em seu cron, para parar mate o processo!
+#  ps aux | grep "despertador"
+#============================================================================|
+
+#==========VARS========================|
+# 's', para segundos
+# 'm', minutos
+# 'h', hora
+# 'd', dia
+TEMPO_SONECA="5m"     # Soneca de 5m
+SOM_FREQUENCIA="1800"
+ROUND="1"
+#======================================|
+
+#=========TEST=========================|
+# beep existe?
+if ! which beep 1>/dev/null 2>&1; then
+    printf '%b' "Pacote beep não está no sistema... [ERRO]\n"
+    exit 1
+fi
+# módulo pcspk está ativo?
+if ! lsmod | grep -o "pcspkr" 1>/dev/null 2>&1; then
+    if ! modprobe pcspkr 1>/dev/null 2>&1; then
+        printf '%b' "Módulo pcspkr não carregado... [ERRO]\n"
+        exit 1
+    fi
+fi
+
+#======================================|
+
+soneca="1" # Contadora
+while [[ "$soneca" -ne "8" ]]; do
+     beep -f "$SOM_FREQUENCIA" -n -f "$SOM_FREQUENCIA" -n -f "$SOM_FREQUENCIA" # Desperta
+     sleep 0.5s
+     let soneca++   # Incremento
+     if [[ "$soneca" -eq "8" ]]; then
+         soneca="1" # Zera tudo.
+         sleep "$TEMPO_SONECA"  # Tempo de soneca
+     fi
+done
